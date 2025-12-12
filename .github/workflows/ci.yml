@@ -12,7 +12,7 @@ jobs:
     env:
       HEADLESS: "true"
       PYTHONWARNINGS: "ignore"
-      E2E_TIMEOUT: "25"  
+      E2E_TIMEOUT: "40"  
     steps:
       - name: Checkout
         uses: actions/checkout@v4

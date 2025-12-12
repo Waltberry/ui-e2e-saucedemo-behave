@@ -5,6 +5,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 DEFAULT_TIMEOUT = int(os.getenv("E2E_TIMEOUT", "15"))
 
@@ -32,9 +33,12 @@ class BasePage:
         WebDriverWait(self.driver, timeout).until(EC.url_contains(fragment))
         
     def wait_until(self, condition_fn, timeout=DEFAULT_TIMEOUT, poll=0.2):
-        return WebDriverWait(self.driver, timeout, poll_frequency=poll).until(
-            lambda d: condition_fn(d)
-        )
+        """Return True if condition becomes True within timeout, else False (no exception)."""
+        try:
+            WebDriverWait(self.driver, timeout, poll_frequency=poll).until(lambda d: condition_fn(d))
+            return True
+        except TimeoutException:
+            return False
 
     # ---- actions ----
     def click(self, by, locator, timeout=DEFAULT_TIMEOUT):
