@@ -1,3 +1,4 @@
+# features/environment.py
 import os
 import pathlib
 from selenium import webdriver
@@ -16,13 +17,18 @@ def before_all(context):
     options = Options()
     if headless:
         options.add_argument("--headless=new")
-        # Windows headless tends to be more stable with these:
-        options.add_argument("--disable-gpu")
-        options.add_argument("--disable-software-rasterizer")
+        options.add_argument("--disable-gpu")  # Windows headless stability
+        options.add_argument("--hide-scrollbars")
+    # CI hardening
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-background-networking")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--mute-audio")
 
+    # Honor Chrome path from the action
     chrome_bin = os.getenv("CHROME_PATH") or os.getenv("CHROME_BIN")
     if chrome_bin:
         options.binary_location = chrome_bin

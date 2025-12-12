@@ -1,4 +1,5 @@
 # features/steps/checkout_steps.py
+import os
 from behave import given, when, then
 from features.pages.login_page import LoginPage
 from features.pages.inventory_page import InventoryPage
@@ -33,4 +34,5 @@ def step_checkout(context, first, last, postal):
 @then('I should see the order confirmation')
 def step_confirmation(context):
     done = CheckoutCompletePage(context.driver)
-    assert done.is_complete(), "Order confirmation not shown"
+    timeout = int(os.getenv("E2E_TIMEOUT", "60"))
+    assert done.wait_complete(timeout=timeout), "Order confirmation not shown"

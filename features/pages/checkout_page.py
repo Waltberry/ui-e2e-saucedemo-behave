@@ -1,5 +1,5 @@
+# features/pages/checkout_page.py
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from .base_page import BasePage, DEFAULT_TIMEOUT
@@ -13,69 +13,45 @@ class CheckoutPage(BasePage):
     ERROR   = (By.CSS_SELECTOR, "h3[data-test='error']")
     STEP_ONE_URL  = "checkout-step-one"
     STEP_TWO_URL  = "checkout-step-two"
-
-    def _ensure_on_step_one(self, timeout):
-        if self.wait_until(lambda d: len(d.find_elements(*self.FIRST)) > 0, timeout=timeout):
-            return
-        if not self.wait_until(lambda d: self.STEP_ONE_URL in d.current_url, timeout=timeout):
-            try:
-                cur = self.driver.current_url
-                parts = cur.split("/")
-                origin = f"{parts[0]}//{parts[2]}"
-                self.driver.get(f"{origin}/checkout-step-one.html")
-            except Exception:
-                self.driver.get("https://www.saucedemo.com/checkout-step-one.html")
-        self.wait_present(*self.FIRST, timeout=timeout)
+    COMPLETE_URL  = "checkout-complete"
+    COMPLETE_HDR  = (By.CLASS_NAME, "complete-header")
 
     def fill_info(self, first: str, last: str, postal: str, timeout: int = 25):
-        self._ensure_on_step_one(timeout)
-        self.set_value(*self.FIRST, first, timeout=timeout)
-        self.set_value(*self.LAST,  last,  timeout=timeout)
-        self.set_value(*self.POSTAL, postal, timeout=timeout)
+        # Ensure we are on the form page (slow headless sometimes lags)
+        self.wait_url_contains(self.STEP_ONE_URL, timeout=timeout)
+        self.type(*self.FIRST, first)
+        self.type(*self.LAST, last)
+        self.type(*self.POSTAL, postal)
 
     def _await_overview_or_error(self, timeout):
         WebDriverWait(self.driver, timeout).until(EC.any_of(
             EC.url_contains(self.STEP_TWO_URL),
             EC.presence_of_element_located(self.FINISH),
-            EC.presence_of_element_located(self.ERROR)
+            EC.presence_of_element_located(self.ERROR),
         ))
 
     def continue_to_overview(self, timeout: int = 25):
-        # try normal click
         self.click(*self.CONTINUE, timeout=timeout)
         try:
             self._await_overview_or_error(timeout)
         except Exception:
-            # re-click (JS fallback will trigger inside .click) + ENTER in postal as backup
-            try:
-                self.click(*self.CONTINUE, timeout=timeout)
-            except Exception:
-                pass
-            try:
-                self.wait_visible(*self.POSTAL, timeout=5).send_keys(Keys.ENTER)
-            except Exception:
-                pass
-            # final wait
-            try:
-                self._await_overview_or_error(max(timeout, 35))
-            except Exception:
-                # last resort: direct nav to step-two (Sauce Demo allows it after step-one fill)
-                try:
-                    cur = self.driver.current_url
-                    parts = cur.split("/")
-                    origin = f"{parts[0]}//{parts[2]}"
-                    self.driver.get(f"{origin}/checkout-step-two.html")
-                except Exception:
-                    self.driver.get("https://www.saucedemo.com/checkout-step-two.html")
-                WebDriverWait(self.driver, 10).until(
-                    EC.any_of(
-                        EC.url_contains(self.STEP_TWO_URL),
-                        EC.presence_of_element_located(self.FINISH)
-                    )
-                )
+            # Headless sometimes misses the click; verify fields still filled and try once more
+            for by, loc in (self.FIRST, self.LAST, self.POSTAL):
+                _ = self.wait_visible(by, loc, timeout=min(timeout, 5))
+            self.click(*self.CONTINUE, timeout=timeout)
+            self._await_overview_or_error(max(timeout, 45))
+
         errs = self.driver.find_elements(*self.ERROR)
         if errs:
             raise AssertionError(f"Checkout validation error: {errs[0].text}")
 
     def finish(self, timeout: int = 25):
         self.click(*self.FINISH, timeout=timeout)
+        WebDriverWait(self.driver, max(timeout, 35)).until(EC.any_of(
+            EC.url_contains(self.COMPLETE_URL),
+            EC.visibility_of_element_located(self.COMPLETE_HDR),
+            EC.presence_of_element_located(self.ERROR),
+        ))
+        errs = self.driver.find_elements(*self.ERROR)
+        if errs:
+            raise AssertionError(f"Checkout validation error: {errs[0].text}")
