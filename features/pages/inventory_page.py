@@ -11,17 +11,17 @@ class InventoryPage(BasePage):
         self.click(By.ID, btn_id)
 
     def go_to_cart(self, timeout=DEFAULT_TIMEOUT):
+        # Try click + wait twice, then hard-navigate.
         for _ in range(2):
             self.click(*self.CART_LINK, timeout=timeout)
             ok = self.wait_until(
-                lambda d: "/cart.html" in d.current_url
-                          or len(d.find_elements(By.ID, "checkout")) > 0,
+                lambda d: "/cart.html" in d.current_url or len(d.find_elements(By.ID, "checkout")) > 0,
                 timeout=timeout
             )
             if ok:
                 return
-        # Fallback: navigate directly
         try:
+            # Build origin from current URL
             current = self.driver.current_url
             parts = current.split("/")
             origin = f"{parts[0]}//{parts[2]}"

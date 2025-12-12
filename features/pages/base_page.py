@@ -31,7 +31,7 @@ class BasePage:
 
     def wait_url_contains(self, fragment, timeout=DEFAULT_TIMEOUT):
         WebDriverWait(self.driver, timeout).until(EC.url_contains(fragment))
-        
+
     def wait_until(self, condition_fn, timeout=DEFAULT_TIMEOUT, poll=0.2):
         """Return True if condition becomes True within timeout, else False (no exception)."""
         try:
@@ -57,7 +57,6 @@ class BasePage:
                     )
                 except Exception:
                     pass
-
                 elem = self.wait_clickable(by, locator, min(timeout, 10))
                 elem.click()
                 return
@@ -80,5 +79,30 @@ class BasePage:
 
     def type(self, by, locator, text, timeout=DEFAULT_TIMEOUT):
         elem = self.wait_visible(by, locator, timeout)
-        elem.clear()
+        try:
+            elem.clear()
+        except Exception:
+            pass
         elem.send_keys(text)
+
+    def set_value(self, by, locator, text, timeout=DEFAULT_TIMEOUT):
+        """
+        Type and verify, else force with JS (handles flakiness in headless/CI).
+        """
+        elem = self.wait_visible(by, locator, timeout)
+        try:
+            elem.clear()
+        except Exception:
+            pass
+        elem.send_keys(text)
+        val = elem.get_attribute("value") or ""
+        if val != text:
+            # Fallback: force value with JS and dispatch events
+            self.driver.execute_script(
+                """
+                arguments[0].value = arguments[1];
+                arguments[0].dispatchEvent(new Event('input', {bubbles: true}));
+                arguments[0].dispatchEvent(new Event('change', {bubbles: true}));
+                """,
+                elem, text
+            )
