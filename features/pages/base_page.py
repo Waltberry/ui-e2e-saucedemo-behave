@@ -30,6 +30,11 @@ class BasePage:
 
     def wait_url_contains(self, fragment, timeout=DEFAULT_TIMEOUT):
         WebDriverWait(self.driver, timeout).until(EC.url_contains(fragment))
+        
+    def wait_until(self, condition_fn, timeout=DEFAULT_TIMEOUT, poll=0.2):
+        return WebDriverWait(self.driver, timeout, poll_frequency=poll).until(
+            lambda d: condition_fn(d)
+        )
 
     # ---- actions ----
     def click(self, by, locator, timeout=DEFAULT_TIMEOUT):

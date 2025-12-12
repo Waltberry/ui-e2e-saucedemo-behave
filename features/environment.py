@@ -9,6 +9,8 @@ from datetime import datetime
 SCREEN_DIR = pathlib.Path("artifacts") / "screenshots"
 REPORT_DIR = pathlib.Path("reports") / "junit"
 
+
+
 def before_all(context):
     # Ensure artifact folders exist
     SCREEN_DIR.mkdir(parents=True, exist_ok=True)
@@ -25,6 +27,10 @@ def before_all(context):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
+    
+    if os.name == "nt":
+        # Windows-specific options
+        options.add_argument("--disable-gpu")
 
     # If GitHub action sets CHROME_PATH/CHROME_BIN, honor it
     chrome_bin = os.getenv("CHROME_PATH") or os.getenv("CHROME_BIN")
