@@ -1,4 +1,4 @@
-![ui-e2e](https://github.com/Waltberry/ui-e2e-saucedemo-behave/actions/workflows/ui-e2e.yml/badge.svg)
+![CI](https://github.com/Waltberry/ui-e2e-saucedemo-behave/actions/workflows/ci.yml/badge.svg)
 
 # UI E2E — SauceDemo (Behave + Selenium)
 
