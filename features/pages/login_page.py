@@ -2,18 +2,18 @@ from selenium.webdriver.common.by import By
 from .base_page import BasePage
 
 class LoginPage(BasePage):
-    USER = (By.ID, "user-name")
-    PASS = (By.ID, "password")
-    BTN  = (By.ID, "login-button")
-    ERROR= (By.CSS_SELECTOR, "h3[data-test='error']")
+    USERNAME = (By.ID, "user-name")
+    PASSWORD = (By.ID, "password")
+    LOGIN_BTN = (By.ID, "login-button")
 
-    def open_login(self):
-        self.open("")
+    def __init__(self, driver, base_url):
+        super().__init__(driver)
+        self.url = base_url
 
-    def login(self, username, password):
-        self.type(self.USER, username)
-        self.type(self.PASS, password)
-        self.click(self.BTN)
+    def open(self):
+        self.driver.get(self.url)
 
-    def error_message(self):
-        return self.text_of(self.ERROR)
+    def login(self, username: str, password: str):
+        self.type(*self.USERNAME, username)
+        self.type(*self.PASSWORD, password)
+        self.click(*self.LOGIN_BTN)

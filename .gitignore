@@ -1,25 +1,13 @@
 # Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.egg-info/
 .venv/
-env/
-venv/
+.env
 
-# Behave reports & screenshots
+# Reports & artifacts
 reports/
-screenshots/
+artifacts/
 
-# OS / Editor
+# OS/IDE
 .DS_Store
-.idea/
 .vscode/
-
-# Coverage / cache
-.coverage
-htmlcov/
-.mypy_cache/
-.pytest_cache/
-.cache/
