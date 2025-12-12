@@ -11,7 +11,7 @@ A small, production-style end-to-end test suite that automates a purchase on the
 
 ## Why this project exists
 
-This repo demonstrates how I approach **Quality Engineering** in a realistic, reproducible way:
+**Quality Engineering** in a realistic, reproducible way:
 
 - **Clear business flow** (buy a product) expressed in a single, readable **Gherkin** scenario.
 - **Maintainable code** via **Page Object Model** and explicit waits (flakiness control).
