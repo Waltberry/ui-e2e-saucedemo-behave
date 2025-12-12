@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+env/
+venv/
+
+# Behave reports & screenshots
+reports/
+screenshots/
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Coverage / cache
+.coverage
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.cache/
