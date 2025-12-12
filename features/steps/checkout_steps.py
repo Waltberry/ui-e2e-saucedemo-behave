@@ -1,3 +1,4 @@
+# features/steps/checkout_steps.py
 from behave import given, when, then
 from features.pages.login_page import LoginPage
 from features.pages.inventory_page import InventoryPage
